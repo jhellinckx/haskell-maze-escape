@@ -28,7 +28,11 @@ mapper m k = m Map.! k
 
 showPath :: Maze -> Maybe Path -> [[Char]]
 showPath maze Nothing = ["No solution found."]
-showPath maze (Just path) = map (map serializeCell) $ map (map (\((x, y), cell) -> if elem (x, y) path then Path else cell)) $ withCoords maze
+showPath maze (Just path) = map (map serializeCell) $ map (map transform) $ withCoords maze
+    where transform (_, Start) = Start
+          transform (_, End) = End
+          transform ((x, y), cell) = if elem (x, y) path then Path else cell
+
 
 withCoords :: Maze -> [[(Coord, MazeCell)]]
 withCoords maze = map (\(y, row) -> zipWith (\x e -> ((x, y), e)) [0..] row) $ zip [0..] maze
@@ -55,8 +59,7 @@ coord :: Maze -> MazeCell -> Maybe Coord
 maze `coord` cell = pure fst <*> (find (\((x, y), c) -> c == cell) $ concat $ withCoords maze)
 
 bfs :: Maze -> Maybe Path
-bfs maze = start >>= (bfstart maze)
-    where start = maze `coord` Start
+bfs maze = maze `coord` Start >>= (bfstart maze)
 
 bfstart :: Maze -> Coord -> Maybe Path
 bfstart maze start = bfstep maze [(start, Start, [])] []
