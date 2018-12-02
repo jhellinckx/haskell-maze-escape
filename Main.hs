@@ -13,6 +13,7 @@ main = do [path] <- System.Environment.getArgs
 data MazeCell = Wall | Pathway | Path | Start | End deriving (Eq, Ord)
 type Position = (Int, Int)
 type Path = [Position]
+-- We use Data.Array internally for constant time indexing
 type Maze = Array Position MazeCell
 
 motions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -62,7 +63,3 @@ bfstep _ [] _ = Nothing
 bfstep _ ((_, End, _:p):_) _ = Just p
 bfstep maze ((h, _, p):queue) visited = bfstep maze (queue ++ (map (\pos -> (pos, maze ! pos, pos:p)) adj)) (visited ++ adj)
     where adj = filter (not . (flip elem visited)) (adjacents maze h)
-
-
-
-
